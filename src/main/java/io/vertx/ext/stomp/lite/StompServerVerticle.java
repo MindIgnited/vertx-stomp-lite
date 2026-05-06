@@ -17,6 +17,7 @@
 
 package io.vertx.ext.stomp.lite;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
 import io.vertx.core.VerticleBase;
 import io.vertx.core.http.HttpServer;
@@ -66,7 +67,7 @@ public class StompServerVerticle extends VerticleBase {
                          if (context.request().canUpgradeToWebSocket()) {
                              ssWebSocketHandler.onHttpServerRequest(context.request());
                          } else {
-                             context.response().setStatusCode(400).end();
+                             context.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code()).end();
                          }
                      });
         requestRouter.route()
@@ -74,7 +75,7 @@ public class StompServerVerticle extends VerticleBase {
                          if (router != null) {
                              router.handle(context.request());
                          } else {
-                             context.response().setStatusCode(404).end();
+                             context.response().setStatusCode(HttpResponseStatus.NOT_FOUND.code()).end();
                          }
                      });
 

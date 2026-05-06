@@ -1,19 +1,3 @@
-/*
- *  Copyright (c) 2011-2015 The original author or authors
- *  ------------------------------------------------------
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  and Apache License v2.0 which accompanies this distribution.
- *
- *       The Eclipse Public License is available at
- *       http://www.eclipse.org/legal/epl-v10.html
- *
- *       The Apache License v2.0 is available at
- *       http://www.opensource.org/licenses/apache2.0.php
- *
- *  You may elect to redistribute this code under either of these licenses.
- */
-
 package io.vertx.ext.stomp.lite;
 
 import io.vertx.core.Future;
@@ -40,16 +24,25 @@ public interface StompServerHandler {
     Future<MultiMap> handshake(MultiMap transportHeaders);
 
     /**
-     * Handles the STOMP CONNECT frame once the transport connection is available.
+     * Called when the transport connection has been created.
+     *
+     * <p>This does not mean the STOMP session is connected. The client must still send a CONNECT frame that is accepted
+     * by {@link #connect(Map)}.</p>
+     *
+     * @param stompServerConnection the established transport connection for this STOMP session
+     */
+    void connectionCreated(StompServerConnection stompServerConnection);
+
+    /**
+     * Handles the STOMP CONNECT frame.
      *
      * <p>A completed future accepts the STOMP connection. A failed future rejects the STOMP connection and sends an
      * ERROR frame to the client.</p>
      *
-     * @param stompServerConnection the established transport connection for this STOMP session
      * @param connectHeaders all the headers provided with the CONNECT frame. This will include the login and passcode headers.
      * @return a {@link Future} containing headers to return to the client with the CONNECTED frame
      */
-    Future<Map<String, String>> connect(StompServerConnection stompServerConnection, Map<String, String> connectHeaders);
+    Future<Map<String, String>> connect(Map<String, String> connectHeaders);
 
 
     /**

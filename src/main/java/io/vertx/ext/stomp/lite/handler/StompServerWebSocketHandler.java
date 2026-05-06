@@ -16,6 +16,7 @@
 
 package io.vertx.ext.stomp.lite.handler;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
@@ -62,9 +63,9 @@ public class StompServerWebSocketHandler {
                         }
                         request.toWebSocket()
                                  .onSuccess(socket -> configureServerWebSocket(socket, stompServerHandler))
-                                 .onFailure(throwable -> log.debug("Could not upgrade request to WebSocket", throwable));
+                                 .onFailure(throwable -> log.error("Could not upgrade request to WebSocket", throwable));
                     } else {
-                        request.response().setStatusCode(401).end();
+                        request.response().setStatusCode(HttpResponseStatus.UNAUTHORIZED.code()).end();
                     }
                 });
     }
@@ -89,7 +90,7 @@ public class StompServerWebSocketHandler {
               .handler(defaultStompServerConnection);
 
         socket.handler(buffer -> {
-            // Additional check to make sure that we don't parse a bunch of data when the client has not successfully authenticated
+            // Additional check to make sure that we don't parse a bunch of data when the client has not successfully connected
             if(!defaultStompServerConnection.isConnected()) {
                 // client has not connected yet make ensure the client is sending a connect frame without parsing it completely
                 if(buffer.length() > options.getMaxConnectFrameLength()){
