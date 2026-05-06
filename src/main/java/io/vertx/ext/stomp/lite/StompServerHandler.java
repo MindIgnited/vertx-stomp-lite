@@ -17,7 +17,7 @@
 package io.vertx.ext.stomp.lite;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
+import io.vertx.core.MultiMap;
 import io.vertx.ext.stomp.lite.frame.Frame;
 
 import java.util.Map;
@@ -35,6 +35,17 @@ public interface StompServerHandler {
      *         The promise must contain a Map that will provide any additional headers to be returned to the client with the CONNECTED frame
      */
     Future<Map<String, String>> authenticate(Map<String, String> connectHeaders);
+
+    /**
+     * Requests authentication for the given credentials and WebSocket handshake headers.
+     * @param connectHeaders all the headers provided with the CONNECT frame. This will include the login and passcode headers.
+     * @param websocketHeaders all the headers provided with the WebSocket handshake request.
+     * @return a {@link Future} completed normally to authenticate or failed to represent a failed authentication
+     *         The promise must contain a Map that will provide any additional headers to be returned to the client with the CONNECTED frame
+     */
+    default Future<Map<String, String>> authenticate(Map<String, String> connectHeaders, MultiMap websocketHeaders) {
+        return authenticate(connectHeaders);
+    }
 
 
     void send(Frame frame);

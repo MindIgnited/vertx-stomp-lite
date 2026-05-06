@@ -17,8 +17,6 @@
 package io.vertx.ext.stomp.lite;
 
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.ext.stomp.lite.handler.StompServerWebSocketHandler;
-import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 
 /**
