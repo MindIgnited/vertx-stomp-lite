@@ -1,19 +1,3 @@
-/*
- *  Copyright (c) 2011-2015 The original author or authors
- *  ------------------------------------------------------
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  and Apache License v2.0 which accompanies this distribution.
- *
- *       The Eclipse Public License is available at
- *       http://www.eclipse.org/legal/epl-v10.html
- *
- *       The Apache License v2.0 is available at
- *       http://www.opensource.org/licenses/apache2.0.php
- *
- *  You may elect to redistribute this code under either of these licenses.
- */
-
 package io.vertx.ext.stomp.lite.handler;
 
 import io.vertx.core.Future;
@@ -25,7 +9,6 @@ import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.stomp.lite.StompServerConnection;
 import io.vertx.ext.stomp.lite.StompServerHandler;
-import io.vertx.ext.stomp.lite.StompServerHandlerFactory;
 import io.vertx.ext.stomp.lite.StompServerOptions;
 import io.vertx.ext.stomp.lite.frame.Frame;
 import io.vertx.ext.stomp.lite.frame.FrameParser;
@@ -64,13 +47,12 @@ class DefaultStompServerConnection implements Handler<Frame>, StompServerConnect
     DefaultStompServerConnection(ServerWebSocket serverWebSocket,
                                  Vertx vertx,
                                  StompServerOptions options,
-                                 StompServerHandlerFactory factory) {
+                                 StompServerHandler stompServerHandler) {
         this.serverWebSocket = serverWebSocket;
         this.vertx = vertx;
         this.options = options;
-
-        // Create new handler to do the bulk of the work..
-        this.stompServerHandler = factory.create(this);
+        this.stompServerHandler = stompServerHandler;
+        this.stompServerHandler.connectionCreated(this);
 
         if(log.isDebugEnabled()){
             log.debug("New Stomp Connection. Host: {}", serverWebSocket.remoteAddress().host());
@@ -368,9 +350,9 @@ class DefaultStompServerConnection implements Handler<Frame>, StompServerConnect
             throw new IllegalStateException("Client protocol requirement does not mach versions supported by the server.");
         }
 
-        // Now authenticate client providing headers passed to CONNECT frame and WebSocket handshake
+        // Now process the client CONNECT frame
         stompServerHandler
-                .authenticate(frame.getHeaders(), serverWebSocket.headers())
+                .connect(frame.getHeaders())
                 .onComplete(authenticatePromise -> {
 
                     if (authenticatePromise.succeeded()) {

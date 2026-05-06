@@ -17,6 +17,7 @@
 
 package io.vertx.ext.stomp.lite;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
 import io.vertx.core.VerticleBase;
 import io.vertx.core.http.HttpServer;
@@ -60,17 +61,29 @@ public class StompServerVerticle extends VerticleBase {
     public Future<?> start() {
         StompServerWebSocketHandler ssWebSocketHandler
                 = new StompServerWebSocketHandler(vertx, stompOptions, stompServerHandlerFactory);
+        Router requestRouter = Router.router(vertx);
+        requestRouter.route(stompOptions.getWebsocketPath())
+                     .handler(context -> {
+                         if (context.request().canUpgradeToWebSocket()) {
+                             ssWebSocketHandler.onHttpServerRequest(context.request());
+                         } else {
+                             context.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code()).end();
+                         }
+                     });
+        requestRouter.route()
+                     .handler(context -> {
+                         if (router != null) {
+                             router.handle(context.request());
+                         } else {
+                             context.response().setStatusCode(HttpResponseStatus.NOT_FOUND.code()).end();
+                         }
+                     });
 
         httpServer = vertx.createHttpServer(httpOptions)
-                          .webSocketHandshakeHandler(ssWebSocketHandler::onServerWebSocketHandshake)
-                          .webSocketHandler(ssWebSocketHandler::onServerWebSocket)
+                          .requestHandler(requestRouter)
                           .exceptionHandler(event -> log.error(
                                   "Stomp server Exception before completing Client Connection",
                                   event));
-
-        if(router != null){
-            httpServer.requestHandler(router);
-        }
 
         return httpServer.listen(stompOptions.getPort(), stompOptions.getHost());
     }
