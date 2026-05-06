@@ -368,9 +368,9 @@ class DefaultStompServerConnection implements Handler<Frame>, StompServerConnect
             throw new IllegalStateException("Client protocol requirement does not mach versions supported by the server.");
         }
 
-        // Now authenticate client providing headers passed to CONNECT frame
+        // Now authenticate client providing headers passed to CONNECT frame and WebSocket handshake
         stompServerHandler
-                .authenticate(frame.getHeaders())
+                .authenticate(frame.getHeaders(), serverWebSocket.headers())
                 .onComplete(authenticatePromise -> {
 
                     if (authenticatePromise.succeeded()) {
