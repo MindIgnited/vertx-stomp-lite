@@ -29,39 +29,83 @@ import java.util.Map;
 public interface StompServerHandler {
 
     /**
-     * Requests authentication for the given credentials
-     * @param connectHeaders all the headers provided with the CONNECT frame. This will include the login and passcode headers.
-     * @return a {@link Future} completed normally to authenticate or failed to represent a failed authentication
-     *         The promise must contain a Map that will provide any additional headers to be returned to the client with the CONNECTED frame
+     * Handles a transport handshake before the STOMP connection is established.
+     *
+     * <p>For WebSocket transports, {@code transportHeaders} contains the HTTP upgrade request headers and returned
+     * headers are added to the HTTP upgrade response before it is accepted. A failed future rejects the handshake.</p>
+     *
+     * @param transportHeaders the headers provided by the transport handshake
+     * @return a {@link Future} containing headers to return with the transport handshake response
      */
-    Future<Map<String, String>> authenticate(Map<String, String> connectHeaders);
+    Future<MultiMap> handshake(MultiMap transportHeaders);
 
     /**
-     * Requests authentication for the given credentials and WebSocket handshake headers.
+     * Handles the STOMP CONNECT frame once the transport connection is available.
+     *
+     * <p>A completed future accepts the STOMP connection. A failed future rejects the STOMP connection and sends an
+     * ERROR frame to the client.</p>
+     *
+     * @param stompServerConnection the established transport connection for this STOMP session
      * @param connectHeaders all the headers provided with the CONNECT frame. This will include the login and passcode headers.
-     * @param websocketHeaders all the headers provided with the WebSocket handshake request.
-     * @return a {@link Future} completed normally to authenticate or failed to represent a failed authentication
-     *         The promise must contain a Map that will provide any additional headers to be returned to the client with the CONNECTED frame
+     * @return a {@link Future} containing headers to return to the client with the CONNECTED frame
      */
-    default Future<Map<String, String>> authenticate(Map<String, String> connectHeaders, MultiMap websocketHeaders) {
-        return authenticate(connectHeaders);
-    }
+    Future<Map<String, String>> connect(StompServerConnection stompServerConnection, Map<String, String> connectHeaders);
 
 
+    /**
+     * Handles a STOMP SEND frame.
+     *
+     * @param frame the SEND frame received from the client
+     */
     void send(Frame frame);
 
+    /**
+     * Handles a STOMP SUBSCRIBE frame.
+     *
+     * @param frame the SUBSCRIBE frame received from the client
+     */
     void subscribe(Frame frame);
 
+    /**
+     * Handles a STOMP UNSUBSCRIBE frame.
+     *
+     * @param frame the UNSUBSCRIBE frame received from the client
+     */
     void unsubscribe(Frame frame);
 
+    /**
+     * Handles a STOMP BEGIN frame.
+     *
+     * @param frame the BEGIN frame received from the client
+     */
     void begin(Frame frame);
 
+    /**
+     * Handles a STOMP ABORT frame.
+     *
+     * @param frame the ABORT frame received from the client
+     */
     void abort(Frame frame);
 
+    /**
+     * Handles a STOMP COMMIT frame.
+     *
+     * @param frame the COMMIT frame received from the client
+     */
     void commit(Frame frame);
 
+    /**
+     * Handles a STOMP ACK frame.
+     *
+     * @param frame the ACK frame received from the client
+     */
     void ack(Frame frame);
 
+    /**
+     * Handles a STOMP NACK frame.
+     *
+     * @param frame the NACK frame received from the client
+     */
     void nack(Frame frame);
 
     /**

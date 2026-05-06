@@ -16,10 +16,12 @@
 
 package io.vertx.ext.stomp.lite.handler;
 
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.http.ServerWebSocketHandshake;
+import io.vertx.ext.stomp.lite.StompServerHandler;
 import io.vertx.ext.stomp.lite.StompServerHandlerFactory;
 import io.vertx.ext.stomp.lite.StompServerOptions;
 import io.vertx.ext.stomp.lite.frame.FrameParser;
@@ -47,23 +49,31 @@ public class StompServerWebSocketHandler {
         this.factory = factory;
     }
 
-    public void onServerWebSocketHandshake(ServerWebSocketHandshake handshake) {
-        if (!handshake.path().equals(options.getWebsocketPath())) {
-            String error = "Receiving a web socket connection on an invalid path (" + handshake.path() + "), the path is "
-                    + "configured to " + options.getWebsocketPath() + ". Rejecting connection";
-            log.error(error);
-
-            handshake.reject();
-        }else{
-            handshake.accept();
-        }
+    public void onHttpServerRequest(HttpServerRequest request) {
+        request.pause();
+        StompServerHandler stompServerHandler = factory.create();
+        stompServerHandler
+                .handshake(request.headers())
+                .onComplete(ar -> {
+                    if (ar.succeeded()) {
+                        MultiMap responseHeaders = ar.result();
+                        if (responseHeaders != null) {
+                            request.response().headers().addAll(responseHeaders);
+                        }
+                        request.toWebSocket()
+                                 .onSuccess(socket -> configureServerWebSocket(socket, stompServerHandler))
+                                 .onFailure(throwable -> log.debug("Could not upgrade request to WebSocket", throwable));
+                    } else {
+                        request.response().setStatusCode(401).end();
+                    }
+                });
     }
 
-    public void onServerWebSocket(ServerWebSocket socket) {
+    private void configureServerWebSocket(ServerWebSocket socket, StompServerHandler stompServerHandler) {
         DefaultStompServerConnection defaultStompServerConnection = new DefaultStompServerConnection(socket,
                                                                                                      vertx,
                                                                                                      options,
-                                                                                                     factory);
+                                                                                                     stompServerHandler);
         socket.exceptionHandler((exception) -> {
             boolean skip = exception instanceof VertxException && exception.getMessage().equals("Connection was closed");
             if (!skip) {

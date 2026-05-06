@@ -22,6 +22,11 @@ package io.vertx.ext.stomp.lite;
  */
 public interface StompServerHandlerFactory {
 
-    StompServerHandler create(StompServerConnection stompServerConnection);
+    /**
+     * Creates a handler for a new client connection before the transport handshake is accepted.
+     *
+     * @return the handler that will receive transport handshake and STOMP frame callbacks for the connection
+     */
+    StompServerHandler create();
 
 }
