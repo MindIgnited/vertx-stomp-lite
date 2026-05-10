@@ -353,11 +353,11 @@ class DefaultStompServerConnection implements Handler<Frame>, StompServerConnect
         // Now process the client CONNECT frame
         stompServerHandler
                 .connect(frame.getHeaders())
-                .onComplete(authenticatePromise -> {
+                .onComplete(connectResult -> {
 
-                    if (authenticatePromise.succeeded()) {
+                    if (connectResult.succeeded()) {
 
-                        Headers headers = Headers.create(authenticatePromise.result());
+                        Headers headers = Headers.create(connectResult.result());
                         headers.add(Frame.VERSION,
                                     version); // Spec says: The server will respond back with the highest version of the protocol -> version
                         headers.add(Frame.HEARTBEAT, Frame.Heartbeat.create(options.getHeartbeat()).toString());
@@ -394,7 +394,7 @@ class DefaultStompServerConnection implements Handler<Frame>, StompServerConnect
                                 });
 
                     } else {
-                        logIfFailed(sendErrorAndDisconnect(authenticatePromise.cause()),
+                        logIfFailed(sendErrorAndDisconnect(connectResult.cause()),
                                     "Problem Sending Authentication Error to client");
                     }
                 });

@@ -27,6 +27,7 @@ import io.vertx.ext.stomp.lite.StompServerHandlerFactory;
 import io.vertx.ext.stomp.lite.StompServerOptions;
 import io.vertx.ext.stomp.lite.frame.FrameParser;
 import io.vertx.ext.stomp.lite.frame.InvalidConnectFrame;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +51,12 @@ public class StompServerWebSocketHandler {
         this.factory = factory;
     }
 
-    public void onHttpServerRequest(HttpServerRequest request) {
+    public void onRoutingContext(RoutingContext routingContext) {
+        HttpServerRequest request = routingContext.request();
         request.pause();
         StompServerHandler stompServerHandler = factory.create();
         stompServerHandler
-                .handshake(request.headers())
+                .handshake(routingContext)
                 .onComplete(ar -> {
                     if (ar.succeeded()) {
                         MultiMap responseHeaders = ar.result();

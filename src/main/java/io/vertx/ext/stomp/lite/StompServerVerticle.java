@@ -65,7 +65,7 @@ public class StompServerVerticle extends VerticleBase {
         requestRouter.route(stompOptions.getWebsocketPath())
                      .handler(context -> {
                          if (context.request().canUpgradeToWebSocket()) {
-                             ssWebSocketHandler.onHttpServerRequest(context.request());
+                             ssWebSocketHandler.onRoutingContext(context);
                          } else {
                              context.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code()).end();
                          }
