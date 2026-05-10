@@ -3,6 +3,7 @@ package io.vertx.ext.stomp.lite;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.stomp.lite.frame.Frame;
+import io.vertx.ext.web.RoutingContext;
 
 import java.util.Map;
 
@@ -15,13 +16,14 @@ public interface StompServerHandler {
     /**
      * Handles a transport handshake before the STOMP connection is established.
      *
-     * <p>For WebSocket transports, {@code transportHeaders} contains the HTTP upgrade request headers and returned
-     * headers are added to the HTTP upgrade response before it is accepted. A failed future rejects the handshake.</p>
+     * <p>For WebSocket transports, {@code routingContext} provides access to the HTTP upgrade request (including
+     * headers, path parameters, session and user data) and returned headers are added to the HTTP upgrade response
+     * before it is accepted. A failed future rejects the handshake.</p>
      *
-     * @param transportHeaders the headers provided by the transport handshake
+     * @param routingContext the {@link RoutingContext} of the transport handshake request
      * @return a {@link Future} containing headers to return with the transport handshake response
      */
-    Future<MultiMap> handshake(MultiMap transportHeaders);
+    Future<MultiMap> handshake(RoutingContext routingContext);
 
     /**
      * Called when the transport connection has been created.
