@@ -317,7 +317,9 @@ class DefaultStompServerConnection implements Handler<Frame>, StompServerConnect
                         throw new IllegalStateException("Unknown command");
                 }
             } catch (Exception e) {
-                clientCausedException(e, false);
+                // Sync throws from the user StompServerHandler (e.g. connect()) must produce
+                // a STOMP ERROR frame so the client sees a diagnostic instead of a bare WS close.
+                clientCausedException(e, true);
             }
         } else {
             log.error("THIS SHOULD NEVER HAPPEN!! Frame Handler called after close.");
