@@ -59,28 +59,24 @@ public class StompServerVerticle extends VerticleBase {
 
     @Override
     public Future<?> start() {
-        StompServerWebSocketHandler ssWebSocketHandler
-                = new StompServerWebSocketHandler(vertx, stompOptions, stompServerHandlerFactory);
-        Router requestRouter = Router.router(vertx);
-        requestRouter.route(stompOptions.getWebsocketPath())
-                     .handler(context -> {
-                         if (context.request().canUpgradeToWebSocket()) {
-                             ssWebSocketHandler.onRoutingContext(context);
-                         } else {
-                             context.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code()).end();
-                         }
-                     });
-        requestRouter.route()
-                     .handler(context -> {
-                         if (router != null) {
-                             router.handle(context.request());
-                         } else {
-                             context.response().setStatusCode(HttpResponseStatus.NOT_FOUND.code()).end();
-                         }
-                     });
+        StompServerWebSocketHandler ssWebSocketHandler =
+                new StompServerWebSocketHandler(vertx, stompOptions, stompServerHandlerFactory);
+
+        Router effectiveRouter = router != null ? router : Router.router(vertx);
+
+        effectiveRouter.route(stompOptions.getWebsocketPath())
+                       .handler(context -> {
+                           if (context.request().canUpgradeToWebSocket()) {
+                               ssWebSocketHandler.onRoutingContext(context);
+                           } else {
+                               context.response()
+                                      .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
+                                      .end();
+                           }
+                       });
 
         httpServer = vertx.createHttpServer(httpOptions)
-                          .requestHandler(requestRouter)
+                          .requestHandler(effectiveRouter)
                           .exceptionHandler(event -> log.error(
                                   "Stomp server Exception before completing Client Connection",
                                   event));
