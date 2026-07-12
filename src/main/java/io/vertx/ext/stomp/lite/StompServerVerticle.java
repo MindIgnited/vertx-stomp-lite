@@ -81,7 +81,7 @@ public class StompServerVerticle extends VerticleBase {
                                   "Stomp server Exception before completing Client Connection",
                                   event));
 
-        return httpServer.listen(stompOptions.getPort(), stompOptions.getHost());
+        return httpServer.listen();
     }
 
     @Override
