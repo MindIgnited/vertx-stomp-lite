@@ -17,7 +17,7 @@ ext {
     apacheCommonsVersion='3.20.0'
     logbackVersion='1.5.25'
     nettyVersion='4.1.115.Final'
-    vertxVersion='5.0.12'
+    vertxVersion='5.1.4'
 }
 
 
