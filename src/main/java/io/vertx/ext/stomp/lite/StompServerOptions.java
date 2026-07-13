@@ -16,8 +16,6 @@ public class StompServerOptions {
   public static final int DEFAULT_MAX_BODY_LENGTH = 1024 * 1024 * 10;
 
   public static final String DEFAULT_WEBSOCKET_PATH = "/stomp";
-  public static int DEFAULT_STOMP_PORT = 61613;
-  public static String DEFAULT_STOMP_HOST = "0.0.0.0";
 
   public static JsonObject DEFAULT_STOMP_HEARTBEAT = new JsonObject().put("x", 30000).put("y", 30000);
   public static boolean DEFAULT_TRAILING_LINE = false;
@@ -32,8 +30,6 @@ public class StompServerOptions {
 
   private String websocketPath = DEFAULT_WEBSOCKET_PATH;
   private boolean trailingLine = DEFAULT_TRAILING_LINE;
-  private int port;
-  private String host;
   private boolean debugEnabled = DEFAULT_DEBUG_ENABLED;
 
   /**
@@ -41,8 +37,6 @@ public class StompServerOptions {
    */
   public StompServerOptions() {
     super();
-    setPort(DEFAULT_STOMP_PORT);
-    setHost(DEFAULT_STOMP_HOST);
   }
 
   /**
@@ -124,42 +118,6 @@ public class StompServerOptions {
   public StompServerOptions setMaxHeaders(int maxHeaders) {
     this.maxHeaders = maxHeaders;
     return this;
-  }
-
-  /**
-   * Sets the port on which the server is going to listen for connections.
-   *
-   * @param port the port number
-   * @return the current {@link StompServerOptions}.
-   */
-  public StompServerOptions setPort(int port) {
-    this.port = port;
-    return this;
-  }
-
-  /**
-   * @return the port
-   */
-  public int getPort() {
-    return port;
-  }
-
-  /**
-   * Set the host
-   * @param host  the host
-   * @return a reference to this, so the API can be used fluently
-   */
-  public StompServerOptions setHost(String host) {
-    this.host = host;
-    return this;
-  }
-
-  /**
-   *
-   * @return the host
-   */
-  public String getHost(){
-    return host;
   }
 
   /**
